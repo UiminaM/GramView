@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Отзывы{% endblock %}
+
+{% block content %}
+  <h2>Отзывы</h2>
+  {% for review in reviews %}
+    <div class="review">
+      <img class="avatar" src="{{ review.id_profile.profile_picture.url }}" alt="avatar">
+      <div class="review-content">
+        <div class="review-header">
+          <strong>@{{ review.id_profile.username }}</strong>  <!-- Ник пользователя -->
+          <span>{{ review.date_create }}</span>  <!-- Дата создания отзыва -->
+        </div>
+        <p>{{ review.text }}</p>
+        <div class="stars">
+          {% for i in "12345" %}
+            {% if i|add:0 <= review.rating %}
+              &#9733; {# закрашенная звезда ★ #}
+            {% else %}
+              &#9734; {# пустая звезда ☆ #}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p>Отзывов пока нет.</p>
+  {% endfor %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Главная — GramView{% endblock %}
+
+{% block content %}
+    <section class="section about" id="about">
+        <h2>О компании</h2>
+        <p>
+            GramView — это интеллектуальная платформа для анализа Telegram-каналов. Мы помогаем владельцам и аналитикам получать полезную статистику, визуализировать данные и находить скрытые закономерности в поведении аудитории.
+        </p>
+    </section>
+
+    <section class="section services" id="services">
+        <h2>Наши услуги</h2>
+        <div class="services-list">
+            {% for service in services %}
+                <div class="service-card">
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.description }}</p>
+                </div>
+            {% empty %}
+                <p>Услуги временно не доступны.</p>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
