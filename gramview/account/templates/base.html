@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Заголовок по умолчанию{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'main/css/info.css' %}">
+</head>
+<body>
+    <header>
+        <div class="logo">GramView</div>
+        <nav>
+            <a href="{% url 'index' %}#about">О компании</a>
+            <a href="{% url 'index' %}#services">Услуги</a>
+            <a href="/reviews">Отзывы</a>
+        </nav>
+        <button class="login-btn" onclick="location.href='{% url 'auth' %}'">Войти</button>
+    </header>
+
+    <main>
+        <div>
+            {% block content %}
+            Этот контент будет заменён на уникальный для каждой страницы.
+            {% endblock %}
+        </div>
+    </main>
+</body>
+</html>
