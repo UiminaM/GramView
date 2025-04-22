@@ -19,21 +19,21 @@ def register_view(request):
 def reviews(request):
     reviews = [
         {
-            'avatar': 'https://i.pravatar.cc/50?img=1',
+            'avatar': '',
             'username': 'katya23',
             'date': '2025-04-20',
             'text': 'Очень классный сервис, мне всё понравилось!',
             'rating': 5
         },
         {
-            'avatar': 'https://i.pravatar.cc/50?img=2',
+            'avatar': '',
             'username': 'maksym_88',
             'date': '2025-04-18',
             'text': 'Хорошо, но есть куда расти.',
             'rating': 3
         },
         {
-            'avatar': 'https://i.pravatar.cc/50?img=3',
+            'avatar': '',
             'username': 'lena_k',
             'date': '2025-04-17',
             'text': 'Не совсем то, что я ожидала, но сойдёт.',
