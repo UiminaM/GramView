@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Авторизация{% endblock %}
+
+{% block content %}
+<form method="post">
+  {% csrf_token %}
+  <div class="login-container">
+    <label for="id_username"><b>Логин</b></label>
+    <input type="text" name="username" id="id_username" required>
+
+    <label for="id_password"><b>Пароль</b></label>
+    <input type="password" name="password" id="id_password" required>
+
+    <button type="submit">Войти</button>
+
+    <div class="container">
+      <span class="reg"> <a href="{% url 'regis' %}">Регистрация</a></span>
+    </div>
+
+    {% if form.errors %}
+      <div class="error-message">Неверный логин или пароль</div>
+    {% endif %}
+  </div>
+</form>
+
+<link rel="stylesheet" href="{% static 'auth/css/auth.css' %}">
+{% endblock %}

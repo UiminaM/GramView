@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Отзывы{% endblock %}
+
+{% block content %}
+  {% for review in reviews %}
+    <div class="review">
+      <img class="avatar" src="{{ review.avatar }}" alt="avatar">
+      <div class="review-content">
+        <div class="review-header">
+          <strong>@{{ review.username }}</strong>
+          <span>{{ review.date }}</span>
+        </div>
+        <p>{{ review.text }}</p>
+        <div class="stars">
+          {% for i in "12345" %}
+            {% if forloop.counter <= review.rating %}
+              &#9733; {# закрашенная звезда ★ #}
+            {% else %}
+              &#9734; {# пустая звезда ☆ #}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{% endblock %}
