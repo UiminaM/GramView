@@ -13,23 +13,14 @@
     <section class="section services" id="services">
         <h2>Наши услуги</h2>
         <div class="services-list">
-            <div class="service-card">
-                <h3>Базовая аналитика</h3>
-                <p>Анализ просмотров, реакций, динамика постов.</p>
-            </div>
-            <div class="service-card">
-                <h3>Расширенная статистика</h3>
-                <p>Доступна владельцам каналов, включает охваты, вовлечённость и удержание.</p>
-            </div>
-            <div class="service-card">
-                <h3>Визуализация данных</h3>
-                <p>Графики, диаграммы и сравнительный анализ.</p>
-            </div>
-            <div class="service-card">
-                <h3>AI-анализ</h3>
-                <p>Модели машинного обучения для предиктивной аналитики.</p>
-            </div>
+            {% for service in services %}
+                <div class="service-card">
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.description }}</p>
+                </div>
+            {% empty %}
+                <p>Услуги временно не доступны.</p>
+            {% endfor %}
         </div>
     </section>
 {% endblock %}
-
