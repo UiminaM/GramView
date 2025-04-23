@@ -5,17 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Заголовок по умолчанию{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'main/css/info.css' %}">
+    <link rel="stylesheet" href="{% static 'css/general.css' %}">
 </head>
 <body>
     <header>
         <div class="logo">GramView</div>
         <nav>
-            <a href="{% url 'index' %}#about">О компании</a>
-            <a href="{% url 'index' %}#services">Услуги</a>
-            <a href="/reviews">Отзывы</a>
+            <a href="{% url 'channels' %}">Каналы</a>
+            <a href="{% url 'posts' %}">Посты</a>
+            {% if is_advanced %}
+                <a href="{% url 'my_channels' %}">Мои каналы</a>
+            {% endif %}
         </nav>
-        <button class="login-btn" onclick="location.href='{% url 'auth' %}'">Войти</button>
+        <button class="profile-btn" onclick="location.href='{% url 'profile' %}'">
+            <img src="{{ user.profile_picture.url|default_if_none:'/static/images/default_avatar.png' }}" style="width: auto; height: 20px;">
+        </button>
     </header>
 
     <main>
