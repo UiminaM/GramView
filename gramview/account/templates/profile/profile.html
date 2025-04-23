@@ -1,0 +1,32 @@
+{% extends "account_base.html" %}
+
+{% block title %}Профиль — GramView{% endblock %}
+
+{% block content %}
+  <img src="{{ profile_picture.url }}" alt="Profile Picture" width="150">
+  <h2>{{ user.username }}</h2>
+  <p>Email: {{ user.email }}</p>
+
+  <a href="{% url 'edit_profile' %}"><button>Редактировать профиль</button></a>
+  <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Выйти</button>
+  </form>
+
+  <h3>Отзыв о платформе</h3>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" name="submit_review">Отправить</button>
+    <button type="submit" name="delete_review">Удалить</button>
+  </form>
+
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li class="alert alert-success">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+{% endblock %}

@@ -16,7 +16,7 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('auth')
+            return redirect('profile')
     else:
         form = CustomUserCreationForm()
     return render(request, 'auth/registration.html', {'form': form})
