@@ -10,13 +10,6 @@
 <body>
     <header>
         <div class="logo">GramView</div>
-        <nav>
-            <a href="{% url 'channels' %}">Каналы</a>
-            <a href="{% url 'posts' %}">Посты</a>
-            {% if is_advanced %}
-                <a href="{% url 'my_channels' %}">Мои каналы</a>
-            {% endif %}
-        </nav>
         <button class="profile-btn" onclick="location.href='{% url 'profile' %}'">
             <img src="{{ user.profile_picture.url|default_if_none:'/static/images/default_avatar.png' }}" style="width: auto; height: 20px;">
         </button>

@@ -8,7 +8,7 @@ class CustomLoginView(LoginView):
     template_name = 'auth/authorization.html'
 
     def get_success_url(self):
-        return reverse_lazy('profile')
+        return reverse_lazy('channels')
 
 User = get_user_model()
 

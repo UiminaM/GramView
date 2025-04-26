@@ -1,7 +1,37 @@
 {% extends "account_base.html" %}
-
-{% block title %}Каналы — GramView{% endblock %}
+{% block title %}Каналы{% endblock %}
 
 {% block content %}
-        <h2>Каналы</h2>
+<h2>Список каналов</h2>
+
+<form method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Поиск по названию...">
+    <button type="submit">Поиск</button>
+
+    {% if is_advanced %}
+        <label>
+            <input type="checkbox" name="my" {% if only_my %}checked{% endif %}>
+            Мои каналы
+        </label>
+    {% endif %}
+
+    <button type="button" onclick="location.href='{% url 'add_channel' %}'">+</button>
+</form>
+
+<ul>
+    {% for channel in channels %}
+        <li style="margin-bottom: 15px;">
+            {% if channel.photo_url %}
+                <img src="{{ channel.photo_url }}" width="40" height="40" style="border-radius: 50%;">
+            {% endif %}
+            <strong>{{ channel.name }}</strong> (@{{ channel.username }})
+            <form method="post" action="{% url 'delete_channel' channel.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit">Удалить</button>
+            </form>
+        </li>
+    {% empty %}
+        <p>Каналы не найдены.</p>
+    {% endfor %}
+</ul>
 {% endblock %}

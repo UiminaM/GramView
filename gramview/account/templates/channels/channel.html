@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-
-</body>
-</html>
+<form method="POST" action="{% url 'update_channel' channel.id %}">
+  {% csrf_token %}
+  <button type="submit">Обновить данные</button>
+</form>

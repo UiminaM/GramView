@@ -2,6 +2,7 @@ from django import forms
 from main.models import Review
 from django.contrib.auth.forms import UserChangeForm
 from main.models import CustomUser
+from .models import Channels
 
 
 class ProfileEditForm(UserChangeForm):
@@ -19,3 +20,17 @@ class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
         fields = ['text', 'rating']
+
+class BaseChannelForm(forms.ModelForm):
+    class Meta:
+        model = Channels
+        fields = ['username']
+
+
+class AdvanceChannelForm(forms.ModelForm):
+    phone_number = forms.CharField(max_length=20, required=True)
+    verification_code = forms.CharField(max_length=6, required=True)
+
+    class Meta:
+        model = Channels
+        fields = ['username']

@@ -1,10 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'account_base.html' %}
 
-</body>
-</html>
+{% block content %}
+  <h2>Добавить канал</h2>
+
+  {% if is_advance %}
+    <button id="base_form_button" onclick="showBaseForm()">Простой способ</button>
+    <button id="advanced_form_button" onclick="showAdvancedForm()">Расширенная статистика</button>
+
+    <form method="post" id="base_form" style="display: none;">
+      {% csrf_token %}
+      {{ base_form.as_p }}
+      <button type="submit">Добавить канал</button>
+    </form>
+
+    <form method="post" id="advanced_form" style="display: none;">
+      {% csrf_token %}
+      {{ advanced_form.as_p }}
+      <button type="submit">Добавить канал</button>
+    </form>
+
+    <script>
+      function showBaseForm() {
+        document.getElementById('base_form').style.display = 'block';
+        document.getElementById('advanced_form').style.display = 'none';
+      }
+
+      function showAdvancedForm() {
+        document.getElementById('advanced_form').style.display = 'block';
+        document.getElementById('base_form').style.display = 'none';
+      }
+      window.onload = function() {
+        showBaseForm();
+      }
+    </script>
+
+  {% else %}
+    <form method="post">
+      {% csrf_token %}
+      {{ base_form.as_p }}
+      <button type="submit">Добавить канал</button>
+    </form>
+  {% endif %}
+{% endblock %}

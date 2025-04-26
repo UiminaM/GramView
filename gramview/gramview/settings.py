@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-&@66i5!!)0dns0=6!r!ajez+*78f^2vw2_ecmj$6r4d&rh0#$+"
+SECRET_KEY = "django-insecure-ic%1qq)zdbwb(oo$rfctd01ki6apfu8!b%x_kq^c+h4*@cso3i"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -50,6 +50,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
 
 ROOT_URLCONF = "gramview.urls"
 
@@ -81,7 +82,6 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'main.CustomUser'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -127,6 +127,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
 
 LOGOUT_REDIRECT_URL = '/'
+AUTH_USER_MODEL = 'main.CustomUser'
+

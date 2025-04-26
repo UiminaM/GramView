@@ -5,6 +5,17 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg', blank=True)
+    groups = models.ManyToManyField(
+        'auth.Group',
+        related_name='customuser_groups',  # Это имя будет использоваться для обратной связи с Group
+        blank=True
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        related_name='customuser_permissions',  # Это имя будет использоваться для обратной связи с Permission
+        blank=True
+    )
+
 
 class Service(models.Model):
     title = models.CharField(max_length=200)
