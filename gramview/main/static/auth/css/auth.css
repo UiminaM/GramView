@@ -1,8 +1,72 @@
 .login-container {
-            max-width: 400px;
-            margin: 80px auto;
-            padding: 30px;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    max-width: 450px;
+    margin: 60px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-container label {
+    font-weight: 600;
+    color: #2e3a59;
+    margin-bottom: 5px;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.login-container input[type="text"]:focus,
+.login-container input[type="password"]:focus {
+    border-color: #556ee6;
+    outline: none;
+    box-shadow: 0 0 5px rgba(85, 110, 230, 0.5);
+}
+
+.login-container button {
+    width: 100%;
+    padding: 14px;
+    background: #556ee6;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-container button:hover {
+    background: #4455cc;
+}
+
+.container {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.container .reg a {
+    color: #556ee6;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.container .reg a:hover {
+    text-decoration: underline;
+}
+
+.error-message {
+    margin-top: 15px;
+    color: #e63946;
+    text-align: center;
+    font-weight: bold;
+}

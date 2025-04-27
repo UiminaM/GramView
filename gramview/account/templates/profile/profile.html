@@ -3,15 +3,20 @@
 {% block title %}Профиль — GramView{% endblock %}
 
 {% block content %}
-  <img src="{{ profile_picture.url }}" alt="Profile Picture" width="150">
-  <h2>{{ user.username }}</h2>
-  <p>Email: {{ user.email }}</p>
+<div class="profile">
 
-  <a href="{% url 'edit_profile' %}"><button>Редактировать профиль</button></a>
-  <form method="post" action="{% url 'logout' %}">
+  <form method="post" action="{% url 'logout' %}" class="logout-form">
     {% csrf_token %}
     <button type="submit">Выйти</button>
   </form>
+
+  <img src="{{ profile_picture.url }}" alt="Profile Picture" width="120">
+  <h2>{{ user.username }}</h2>
+  <p>Email: {{ user.email }}</p>
+
+  <a href="{% url 'edit_profile' %}">
+    <button>Редактировать профиль</button>
+  </a>
 
   <h3>Отзыв о платформе</h3>
   <form method="post">
@@ -29,4 +34,5 @@
     </ul>
   {% endif %}
 
+</div>
 {% endblock %}
