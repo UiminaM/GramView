@@ -1,4 +1,98 @@
-<form method="POST" action="{% url 'update_channel' channel.id %}">
-  {% csrf_token %}
-  <button type="submit">Обновить данные</button>
-</form>
+{% extends "account_base.html" %}
+{% block title %}Детали канала{% endblock %}
+
+{% block content %}
+<h2>{{ channel.name }}</h2>
+
+<div class="graphs">
+    {% for graph in available_graphs %}
+        <div class="graph-card">
+            {% if graph == 'Динамика активности' %}
+                {{ dynamic_activity_graph|safe }}
+            {% elif graph == 'Детальная динамика активности' %}
+                {{ detailed_dynamic_activity_graph|safe }}
+            {% elif graph == 'Распределение классов комментариев' %}
+                {{ comments_classification_chart|safe }}
+            {% elif graph == 'Время максимальной активности' %}
+                {{ peak_activity_time_chart|safe }}
+            {% elif graph == 'Рост подписчиков' %}
+                {{ subscriber_growth_chart|safe }}
+            {% elif graph == 'Самые обсуждаемые посты' %}
+                {{ most_discussed_posts_chart|safe }}
+            {% elif graph == 'Самые активные комментаторы' %}
+                {{ top_commentators_chart|safe }}
+            {% else %}
+                <div style="height: 200px; display: flex; align-items: center; justify-content: center; color: #aaa;">
+                    График "{{ graph }}" пока не готов
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+<div id="chat-helper" style="margin-top: 50px;">
+    <h3>Помощник по развитию канала</h3>
+    <div id="selected-graph" style="margin-bottom: 10px; font-style: italic; color: #555;">Выберите график для вопроса</div>
+    <input type="text" id="user-question" placeholder="Введите ваш вопрос..." style="width: 70%; padding: 10px;">
+    <button onclick="sendQuestion()" style="padding: 10px 20px;">Отправить</button>
+    <div id="chat-response" style="margin-top: 20px; white-space: pre-line;"></div>
+</div>
+
+<script>
+    let selectedGraph = "";
+    let selectedGraphData = null;
+
+    document.querySelectorAll('.graph-card').forEach(card => {
+        card.addEventListener('click', function() {
+            selectedGraph = this.innerText.trim();
+            const plot = this.querySelector('.plotly-graph-div');
+            if (plot) {
+                const plotData = plot.data.map(trace => ({
+                    x: trace.x,
+                    y: trace.y,
+                    name: trace.name
+                }));
+                selectedGraphData = plotData;
+            } else {
+                selectedGraphData = null;
+            }
+            document.getElementById('selected-graph').innerText = "Вы выбрали: " + selectedGraph;
+        });
+    });
+
+    function sendQuestion() {
+        const question = document.getElementById('user-question').value;
+        if (!selectedGraph) {
+            alert('Сначала выберите график!');
+            return;
+        }
+        if (!question) {
+            alert('Введите вопрос!');
+            return;
+        }
+
+        document.getElementById('chat-response').innerText = "Загрузка...";
+
+        fetch("{% url 'ask_llm' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: JSON.stringify({
+                "graph_title": selectedGraph,
+                "question": question,
+                "graph_data": selectedGraphData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('chat-response').innerText = data.answer;
+            document.getElementById('chat-response').scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+            document.getElementById('chat-response').innerText = "Ошибка: " + error;
+        });
+    }
+</script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+{% endblock %}

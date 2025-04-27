@@ -2,6 +2,7 @@ from telethon.sync import TelegramClient
 from telethon.sessions import StringSession
 from django.conf import settings
 
+
 def authenticate_user(phone, code):
     session = StringSession()
     client = TelegramClient(

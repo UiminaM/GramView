@@ -2,22 +2,24 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+import torch
+import json
+from django.http import JsonResponse
+from transformers import pipeline, GPT2Tokenizer
 from asgiref.sync import async_to_sync
-from main.models import CustomUser, Review
+from main.models import Review
 from .models import Channels, UserChannelAccess
 from .forms import ReviewForm
 from .forms import ProfileEditForm
 from .forms import BaseChannelForm, AdvanceChannelForm
 from .telegram_auth import authenticate_user
-from .telegram_utils import get_telegram_client, check_channel, get_channel_data
+from .utils.telegram import get_telegram_client, check_channel, get_channel_data
+from .utils.graph import generate_dynamic_activity_chart, generate_comments_classification_chart, generate_peak_activity_time_chart, generate_subscriber_growth_chart, generate_most_discussed_posts_chart, generate_top_commentators_chart
 
 
 def is_advanced_user(user):
     return user.groups.filter(name='advanced').exists()
 
-
-def channels_view(request):
-    return render(request, 'channels/channels.html', {'is_advanced': is_advanced_user(request)})
 
 @login_required
 def profile_view(request):
@@ -73,19 +75,25 @@ def profile_edit_view(request):
 def channels(request):
     query = request.GET.get('q', '')
     only_my = request.GET.get('my', '') == 'on'
-    channels = Channels.objects.filter(users=request.user)
+    is_advanced = is_advanced_user(request.user)
 
+    access_qs = UserChannelAccess.objects.filter(user=request.user)
+    if only_my and is_advanced:
+        access_qs = access_qs.filter(is_owner=True)
+
+    channel_ids = access_qs.values_list('channel_id', flat=True)
+
+    channels = Channels.objects.filter(id__in=channel_ids)
     if query:
         channels = channels.filter(name__icontains=query)
-
-    if only_my:
-        channels = channels.filter(userchannelaccess__user=request.user, userchannelaccess__is_owner=True)
 
     return render(request, 'channels/channels.html', {
         'channels': channels,
         'query': query,
         'only_my': only_my,
+        'is_advanced': is_advanced,
     })
+
 
 def process_form(request, is_advanced):
     if is_advanced:
@@ -142,6 +150,7 @@ def process_form(request, is_advanced):
 
     return None
 
+
 @login_required
 def add_channel(request):
     is_advance = is_advanced_user(request.user)
@@ -177,7 +186,87 @@ def delete_channel(request, channel_id):
     return redirect('channels')
 
 
+@login_required
+def channel_detail(request, channel_id):
+    channel = Channels.objects.get(id=channel_id)
+    user_access = UserChannelAccess.objects.filter(user=request.user, channel=channel).first()
+
+    is_advanced = 'advanced' if user_access.is_owner else 'base'
+
+    graphs_by_role = {
+        'base': [
+            'Динамика активности',
+            'Распределение классов комментариев',
+            'Время максимальной активности',
+        ],
+        'advanced': [
+            'Детальная динамика активности',
+            'Распределение классов комментариев',
+            'Время максимальной активности',
+            'Рост подписчиков',
+            'Самые обсуждаемые посты',
+            'Самые активные комментаторы',
+        ]
+    }
+
+    available_graphs = graphs_by_role[is_advanced]
+
+    dynamic_activity_graph = generate_dynamic_activity_chart(channel, detailed=False)
+    detailed_dynamic_activity_graph = generate_dynamic_activity_chart(channel, detailed=True)
+    comments_classification_chart = generate_comments_classification_chart(channel)
+    peak_activity_time_chart = generate_peak_activity_time_chart(channel, detailed=(is_advanced == 'advanced'))
+    subscriber_growth_chart = generate_subscriber_growth_chart(channel)
+    most_discussed_posts_chart = generate_most_discussed_posts_chart(channel)
+    top_commentators_chart = generate_top_commentators_chart(channel)
+
+    return render(request, 'channels/channel.html', {
+        'channel': channel,
+        'available_graphs': available_graphs,
+        'dynamic_activity_graph': dynamic_activity_graph,
+        'detailed_dynamic_activity_graph': detailed_dynamic_activity_graph,
+        'comments_classification_chart': comments_classification_chart,
+        'peak_activity_time_chart': peak_activity_time_chart,
+        'subscriber_growth_chart': subscriber_growth_chart,
+        'most_discussed_posts_chart': most_discussed_posts_chart,
+        'top_commentators_chart': top_commentators_chart,
+        'is_advanced': is_advanced,
+    })
 
 
+@csrf_exempt
+@login_required
+def ask_llm(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        graph_title = data.get('graph_title')
+        question = data.get('question')
+        graph_data = data.get('graph_data')
 
+        if not graph_title or not question:
+            return JsonResponse({'answer': 'Некорректный запрос.'})
 
+        prompt = f"""Ты — эксперт по аналитике Telegram-каналов.
+Пользователь анализирует график "{graph_title}". Вот данные графика: {graph_data}.
+Вопрос пользователя: "{question}".
+Дай совет по развитию канала, основываясь на цифрах и характере графика.
+"""
+
+        try:
+            tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+            generator = pipeline('text-generation', model='gpt2', device=0 if torch.cuda.is_available() else -1)
+
+            max_input_length = 1024
+            tokens = tokenizer.encode(prompt)
+            if len(tokens) > max_input_length:
+                tokens = tokens[:max_input_length]
+            prompt = tokenizer.decode(tokens)
+
+            response = generator(prompt, max_new_tokens=100, num_return_sequences=1, truncation=True, pad_token_id=50256)
+            answer = response[0]['generated_text']
+
+        except Exception as e:
+            answer = f"Ошибка при обращении к модели: {str(e)}"
+
+        return JsonResponse({'answer': answer})
+    else:
+        return JsonResponse({'answer': 'Только POST-запросы разрешены.'})

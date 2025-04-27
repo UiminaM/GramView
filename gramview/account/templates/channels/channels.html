@@ -10,10 +10,11 @@
 
     {% if is_advanced %}
         <label>
-            <input type="checkbox" name="my" {% if only_my %}checked{% endif %}>
+            <input type="checkbox" name="my" {% if only_my %}checked{% endif %} onchange="this.form.submit()">
             Мои каналы
         </label>
     {% endif %}
+
 
     <button type="button" onclick="location.href='{% url 'add_channel' %}'">+</button>
 </form>
@@ -21,10 +22,12 @@
 <ul>
     {% for channel in channels %}
         <li style="margin-bottom: 15px;">
-            {% if channel.photo_url %}
-                <img src="{{ channel.photo_url }}" width="40" height="40" style="border-radius: 50%;">
-            {% endif %}
-            <strong>{{ channel.name }}</strong> (@{{ channel.username }})
+            <a href="{% url 'channel_detail' channel.id %}" style="text-decoration: none; color: inherit;">
+                {% if channel.photo_url %}
+                    <img src="{{ channel.photo_url }}" width="40" height="40" style="border-radius: 50%;">
+                {% endif %}
+                <strong>{{ channel.name }}</strong> (@{{ channel.username }})
+            </a>
             <form method="post" action="{% url 'delete_channel' channel.id %}" style="display:inline;">
                 {% csrf_token %}
                 <button type="submit">Удалить</button>

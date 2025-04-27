@@ -22,13 +22,44 @@ class UserChannelAccess(models.Model):
 class BaseChannelStats(models.Model):
     channel = models.ForeignKey('Channels', on_delete=models.CASCADE)
     date = models.DateField(auto_now=True)
-    views = models.IntegerField()
     subscribers = models.IntegerField()
 
 
 class PrivateChannelStats(BaseChannelStats):
-    forwards = models.IntegerField()
-    reactions = models.IntegerField()
     engagement_rate = models.FloatField()
     retention_rate = models.FloatField(null=True, blank=True)
     session_string = models.CharField(max_length=255, null=True, blank=True)
+
+
+class Post(models.Model):
+    channel = models.ForeignKey(Channels, on_delete=models.CASCADE, related_name='posts')
+    tg_post_id = models.BigIntegerField()
+    text = models.TextField()
+    published_at = models.DateTimeField()
+    views_count = models.PositiveIntegerField(default=0)
+    reactions_count = models.PositiveIntegerField(default=0)
+    forwards_count = models.PositiveIntegerField(default=0, null=True, blank=True)
+    comments_count = models.PositiveIntegerField(default=0)
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    author_name = models.CharField(max_length=255)
+    text = models.TextField()
+    published_at = models.DateTimeField()
+
+    CLASS_CHOICES = [
+        ('positive', 'Positive'),
+        ('negative', 'Negative'),
+        ('neutral', 'Neutral'),
+    ]
+    classification = models.CharField(max_length=10, choices=CLASS_CHOICES, default='neutral')
+
+
+class SubscriberGrowth(models.Model):
+    channel = models.ForeignKey(Channels, on_delete=models.CASCADE, related_name='subscriber_growth')
+    date = models.DateField()
+    subscribers_count = models.PositiveIntegerField()
+
+    class Meta:
+        unique_together = ('channel', 'date')

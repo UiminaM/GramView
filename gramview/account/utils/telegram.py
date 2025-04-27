@@ -1,7 +1,7 @@
 from telethon.sync import TelegramClient
 from django.conf import settings
 from telethon.sessions import StringSession
-from .models import PrivateChannelStats, BaseChannelStats
+from account.models import PrivateChannelStats, BaseChannelStats
 
 
 async def get_telegram_client():
