@@ -6,6 +6,11 @@ body {
     min-height: 100vh;
     color: #333;
 }
+form h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: left;
+}
 
 header {
     display: flex;

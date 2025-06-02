@@ -10,6 +10,19 @@
     gap: 20px;
 }
 
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.login-container input[type="text"],
+.login-container input[type="password"],
+.login-container button {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .login-container label {
     font-weight: 600;
     color: #2e3a59;

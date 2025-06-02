@@ -9,6 +9,18 @@
     flex-direction: column;
     gap: 20px;
 }
+.form-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.register-container input[type="text"],
+.register-container input[type="password"],
+.register-container button {
+    width: 100%;
+    box-sizing: border-box;
+}
 
 .register-container label {
     font-weight: 600;
