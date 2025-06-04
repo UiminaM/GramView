@@ -11,17 +11,19 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ic%1qq)zdbwb(oo$rfctd01ki6apfu8!b%x_kq^c+h4*@cso3i"
-
+SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -131,4 +133,8 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
 
 LOGOUT_REDIRECT_URL = '/'
 AUTH_USER_MODEL = 'main.CustomUser'
+
+API_ID = env.int('API_ID')
+API_HASH = env('API_HASH')
+BASE_SESSION = env('BASE_SESSION')
 

@@ -34,7 +34,18 @@
             </form>
         </li>
     {% empty %}
-        <p>Каналы не найдены.</p>
-    {% endfor %}
+    <div style="
+        text-align: center;
+        padding: 80px 20px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        margin-top: 30px;
+    ">
+        <h3 style="font-size: 24px; color: #2e3a59; margin-bottom: 15px;">Каналы не найдены</h3>
+        <p style="font-size: 16px; color: #666;">Попробуйте изменить условия поиска или добавьте новый канал.</p>
+        <button onclick="location.href='{% url 'add_channel' %}'" style="margin-top: 20px;">Добавить канал</button>
+    </div>
+{% endfor %}
 </ul>
 {% endblock %}

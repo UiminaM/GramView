@@ -6,7 +6,7 @@
 
 <div class="graphs">
     {% for graph in available_graphs %}
-        <div class="graph-card">
+        <div class="graph-card" data-graph-title="{{ graph }}">
             {% if graph == 'Динамика активности' %}
                 {{ dynamic_activity_graph|safe }}
             {% elif graph == 'Детальная динамика активности' %}
@@ -29,6 +29,29 @@
         </div>
     {% endfor %}
 </div>
+<button id="scroll-to-helper" title="Помощник"
+    style="
+        position: fixed;
+        bottom: 30px;
+        right: 40px;
+        background-color: #556ee6;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        cursor: pointer;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease;
+    ">
+    💬
+</button>
+
 <div id="chat-helper" style="margin-top: 50px;">
     <h3>Помощник по развитию канала</h3>
     <div id="selected-graph" style="margin-bottom: 10px; font-style: italic; color: #555;">Выберите график для вопроса</div>
@@ -43,7 +66,7 @@
 
     document.querySelectorAll('.graph-card').forEach(card => {
         card.addEventListener('click', function() {
-            selectedGraph = this.innerText.trim();
+            selectedGraph = this.dataset.graphTitle;
             const plot = this.querySelector('.plotly-graph-div');
             if (plot) {
                 const plotData = plot.data.map(trace => ({
@@ -55,7 +78,7 @@
             } else {
                 selectedGraphData = null;
             }
-            document.getElementById('selected-graph').innerText = "Вы выбрали: " + selectedGraph;
+            document.getElementById('selected-graph').innerText = "Вопрос по графику \"" + selectedGraph + "\"";
         });
     });
 
@@ -93,6 +116,12 @@
             document.getElementById('chat-response').innerText = "Ошибка: " + error;
         });
     }
+</script>
+
+<script>
+    document.getElementById("scroll-to-helper").addEventListener("click", function() {
+        document.getElementById("chat-helper").scrollIntoView({ behavior: "smooth" });
+    });
 </script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 {% endblock %}

@@ -208,7 +208,7 @@ def generate_subscriber_growth_chart(channel):
 
     fig.update_layout(
         title='Рост подписчиков по неделям',
-        xaxis_title='Неделя (воскресенье)',
+        xaxis_title='Дата (воскресенье недели)',
         yaxis_title='Количество подписчиков',
         template='plotly_white'
     )

@@ -18,13 +18,14 @@
     <button>Редактировать профиль</button>
   </a>
 
-  <h3>Отзыв о платформе</h3>
   <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" name="submit_review">Отправить</button>
-    <button type="submit" name="delete_review">Удалить</button>
-  </form>
+  {% csrf_token %}
+  <h3>Отзыв о платформе</h3>
+  {{ form.as_p }}
+  <button type="submit" name="submit_review">Отправить</button>
+  <button type="submit" name="delete_review">Удалить</button>
+</form>
+
 
   {% if messages %}
     <ul>

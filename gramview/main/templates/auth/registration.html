@@ -7,18 +7,25 @@
 <form method="post">
   {% csrf_token %}
   <div class="register-container">
-    <label for="id_username"><b>Логин</b></label>
-    <input type="text" name="username" id="id_username" required>
+    <div class="form-group">
+      <label for="id_username"><b>Логин</b></label>
+      <input type="text" name="username" id="id_username" required>
+    </div>
 
-    <label for="id_password1"><b>Пароль</b></label>
-    <input type="password" name="password1" id="id_password1" required>
+    <div class="form-group">
+      <label for="id_password1"><b>Пароль</b></label>
+      <input type="password" name="password1" id="id_password1" required>
+    </div>
 
-    <label for="id_password2"><b>Повторите пароль</b></label>
-    <input type="password" name="password2" id="id_password2" required>
+    <div class="form-group">
+      <label for="id_password2"><b>Повторите пароль</b></label>
+      <input type="password" name="password2" id="id_password2" required>
+    </div>
 
     <button type="submit">Зарегистрироваться</button>
   </div>
 </form>
+
 
 <link rel="stylesheet" href="{% static 'auth/css/regis.css' %}">
 {% endblock %}

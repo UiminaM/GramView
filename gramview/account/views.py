@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from django.conf import settings
 from django.http import JsonResponse
 from asgiref.sync import async_to_sync
 from main.models import Review
@@ -9,11 +10,11 @@ from .models import Channels, UserChannelAccess
 from .forms import ReviewForm
 from .forms import ProfileEditForm
 from .forms import BaseChannelForm, AdvanceChannelForm
-from .telegram_auth import authenticate_user
-from .utils.telegram import get_telegram_client, check_channel, get_channel_data
+from .utils.telegram import check_channel, get_channel_data, start_telegram_auth, authenticate_user
 from .utils.graph import generate_dynamic_activity_chart, generate_comments_classification_chart, generate_peak_activity_time_chart, generate_subscriber_growth_chart, generate_most_discussed_posts_chart, generate_top_commentators_chart
 import json
 import ollama
+
 
 def is_advanced_user(user):
     return user.groups.filter(name='advanced').exists()
@@ -114,65 +115,87 @@ def process_form(request, is_advanced):
                 access.save()
             return redirect('channels')
 
+        channel_data = None
+
         if is_advanced:
             phone = form.cleaned_data['phone_number']
             code = form.cleaned_data['verification_code']
             try:
-                client, session_str = authenticate_user(phone, code)
+                session_str = async_to_sync(authenticate_user)(phone, code)
+                result = async_to_sync(check_channel)(username, session_str)
+                if result:
+                    channel_data = async_to_sync(get_channel_data)(username, session_str, is_advanced)
+                else:
+                    messages.error(request, 'Канал не найден')
+                    return None
             except Exception as e:
                 messages.error(request, f"Ошибка авторизации: {str(e)}")
                 return None
-            result = async_to_sync(check_channel)(username, client)
 
         else:
-            client = async_to_sync(get_telegram_client)()
-            result = async_to_sync(check_channel)(username, client)
+            try:
+                result = async_to_sync(check_channel)(username, settings.BASE_SESSION)
+                if result:
+                    channel_data = async_to_sync(get_channel_data)(username, settings.BASE_SESSION, is_advanced)
+            except Exception as e:
+                messages.error(request, f"Ошибка при проверке канала: {str(e)}")
+                return None
 
-        if result:
-            channel_data = async_to_sync(get_channel_data)(username, client, session_str)
-            if channel_data:
-                channel = form.save(commit=False)
-                channel.name = channel_data['name']
-                channel.username = channel_data['username']
-                channel.photo_url = channel_data['photo_url'] or None
-                channel.save()
+        print(channel_data)
+        if channel_data:
+            channel = form.save(commit=False)
+            channel.name = channel_data['title']
+            channel.username = channel_data['username']
+            channel.photo_url = channel_data['photo_url'] or None
+            channel.save()
 
-                UserChannelAccess.objects.create(
-                    channel=channel,
-                    user=request.user,
-                    is_owner=is_advanced
-                )
-                return redirect('channels')
+            UserChannelAccess.objects.create(
+                channel=channel,
+                user=request.user,
+                is_owner=is_advanced
+            )
+            return redirect('channels')
 
         messages.error(request, 'Канал не существует или не найден в Telegram!')
-
     return None
 
 
 @login_required
 def add_channel(request):
     is_advance = is_advanced_user(request.user)
-    base_form = None
-    advanced_form = None
+    base_form = BaseChannelForm()
+    advanced_form = AdvanceChannelForm()
+
+    phone_number = request.session.get('phone_number', '')
 
     if request.method == 'POST':
-        if 'advanced_form' in request.POST:
+        if 'send_code' in request.POST:
+            phone = request.POST.get('phone_number')
+            try:
+                async_to_sync(start_telegram_auth)(phone)
+                request.session['phone_number'] = phone
+                messages.success(request, f'Код отправлен на номер {phone}')
+            except Exception as e:
+                messages.error(request, f'Ошибка при отправке кода: {e}')
+
+        elif 'advanced_form' in request.POST:
             response = process_form(request, True)
-        else:
+            if response:
+                request.session.pop('phone_number', None)
+                return response
+
+        elif 'base_form' in request.POST:
             response = process_form(request, False)
-
-        if response:
-            return response
-
-    else:
-        base_form = BaseChannelForm()
-        advanced_form = AdvanceChannelForm()
+            if response:
+                return response
 
     return render(request, 'channels/add_channel.html', {
         'base_form': base_form,
         'advanced_form': advanced_form,
-        'is_advance': is_advance
+        'is_advance': is_advance,
+        'phone_number': phone_number,
     })
+
 
 
 @csrf_exempt
@@ -239,7 +262,6 @@ def ask_llm(request):
         graph_title = data.get('graph_title')
         question = data.get('question')
         graph_data = data.get('graph_data')
-        print(1)
         if not graph_title or not question:
             return JsonResponse({'answer': 'Некорректный запрос.'})
 
@@ -248,13 +270,11 @@ def ask_llm(request):
     Вопрос пользователя: "{question}".
     Дай совет по развитию канала, основываясь на цифрах и характере графика.
     """
-        print(2)
         try:
             response = ollama.chat(model='mistral', messages=[
                 {'role': 'user', 'content': prompt}
             ])
             answer = response['message']['content']
-            print(answer)
         except Exception as e:
             answer = f"Ошибка при обращении к модели: {str(e)}"
 
