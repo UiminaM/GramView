@@ -2,9 +2,9 @@ from asgiref.sync import sync_to_async
 from telethon.sync import TelegramClient
 from django.conf import settings
 from telethon.sessions import StringSession
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from django.utils.timezone import make_aware, is_naive
-from account.models import Channels, Post, Comment, BaseChannelStats, PrivateChannelStats
+from account.models import Channels, Post, Comment, SubscriberGrowth
 import joblib
 
 
@@ -65,19 +65,16 @@ def save_channel(username, title, photo):
     )
 
 
-@sync_to_async
-def save_post(msg, db_channel):
-    published_at = make_aware(msg.date) if is_naive(msg.date) else msg.date
-
-    return Post.objects.update_or_create(
+async def save_post(msg, channel, reactions_count=0, forwards_count=0):
+    return await Post.objects.aupdate_or_create(
+        channel=channel,
         tg_post_id=msg.id,
-        channel=db_channel,
         defaults={
             'text': msg.message,
-            'published_at': published_at,
+            'published_at': msg.date,
             'views_count': msg.views or 0,
-            'reactions_count': sum([r.count for r in msg.reactions.results]) if msg.reactions else 0,
-            'forwards_count': msg.forwards or 0,
+            'reactions_count': reactions_count,
+            'forwards_count': forwards_count,
         }
     )
 
@@ -102,21 +99,12 @@ def update_comment_count(post_obj, count):
 
 
 @sync_to_async
-def save_base_stats(channel, date, subscribers):
-    return BaseChannelStats.objects.create(
+def save_subscriber_growth(channel, subscribers_count):
+    today = date.today()
+    SubscriberGrowth.objects.create(
         channel=channel,
-        date=date,
-        subscribers=subscribers
-    )
-
-
-@sync_to_async
-def save_private_stats(base_stat, engagement_rate, retention_rate, session_string):
-    return PrivateChannelStats.objects.create(
-        basechannelstats_ptr=base_stat,
-        engagement_rate=engagement_rate,
-        retention_rate=retention_rate,
-        session_string=session_string
+        date=today,
+        subscribers_count=subscribers_count
     )
 
 
@@ -129,33 +117,45 @@ async def get_channel_data(username, session_string, is_advanced):
         photo = await client.download_profile_photo(channel) or ''
 
         db_channel, _ = await save_channel(channel.username, channel.title, photo)
+
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=180)
         posts = []
-
         async for msg in client.iter_messages(channel, offset_date=end_date):
             if msg.date < start_date:
                 break
             if not msg.message:
                 continue
 
-            post_obj, _ = await save_post(msg, db_channel)
+            reactions_count = 0
+            forwards_count = 0
+            if is_advanced:
+                if msg.reactions:
+                    reactions_count = sum(reaction.count for reaction in msg.reactions.results)
+                forwards_count = getattr(msg, "forwards", 0)
+
+            post_obj, _ = await save_post(msg, db_channel, reactions_count=reactions_count,
+                                          forwards_count=forwards_count)
+
             comment_count = 0
             async for reply in client.iter_messages(channel, reply_to=msg.id):
                 if not reply.message:
                     continue
-
                 await save_comment(reply, post_obj)
                 comment_count += 1
 
             await update_comment_count(post_obj, comment_count)
             posts.append(post_obj)
 
+            full_channel = await client.get_entity(channel.username)
+            subscribers = full_channel.participants_count
+
+            save_subscriber_growth(db_channel, subscribers)
 
         return {
-            'title': db_channel.title,
+            'title': db_channel.name,
             'username': db_channel.username,
-            'photo_url': db_channel.photo
+            'photo_url': db_channel.photo_url
         }
 
     except Exception as e:

@@ -197,7 +197,6 @@ def add_channel(request):
     })
 
 
-
 @csrf_exempt
 def delete_channel(request, channel_id):
     access = UserChannelAccess.objects.get(channel_id=channel_id, user=request.user)
