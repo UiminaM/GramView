@@ -323,3 +323,81 @@ li a {
     transition: opacity 0.3s;
     white-space: nowrap;
 }
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form textarea,
+form select {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px 16px;
+    margin-top: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    transition: 0.3s;
+    font-size: 16px;
+}
+
+.channel-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.channel-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    flex-grow: 1;
+    gap: 20px;
+}
+
+.channel-info {
+    display: flex;
+    flex-direction: column;
+     line-height: 1.2;
+}
+
+.channel-info strong{
+    margin-bottom: 2px;
+}
+
+.delete-form {
+    margin-left: 20px;
+}
+
+.delete-form button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.delete-form button:hover {
+    background: #c82333;
+}
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-link {
+  display: inline-block;
+  padding: 8px 12px;
+  background-color: #ccc;
+  color: black;
+  text-decoration: none;
+  border-radius: 4px;
+  line-height: normal;
+}
+
+.button-link:hover {
+  background-color: #bbb;
+}

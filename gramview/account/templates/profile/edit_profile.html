@@ -3,11 +3,11 @@
 {% block title %}Редактирование профиля — GramView{% endblock %}
 
 {% block content %}
-  <h2>Edit Profile</h2>
+  <h2>Редактировать профиль</h2>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Сохранить изменения</button>
+    <button type="submit">Сохранить изменения</button><br><br>
+      <a href="{% url 'profile' %}">Вернуться в профиль</a>
   </form>
-  <a href="{% url 'profile' %}">Вернуться в профиль</a>
 {% endblock %}

@@ -15,20 +15,22 @@
         </label>
     {% endif %}
 
-
     <button type="button" onclick="location.href='{% url 'add_channel' %}'">+</button>
 </form>
 
 <ul>
     {% for channel in channels %}
-        <li style="margin-bottom: 15px;">
-            <a href="{% url 'channel_detail' channel.id %}" style="text-decoration: none; color: inherit;">
+        <li class="channel-item">
+            <a href="{% url 'channel_detail' channel.id %}" class="channel-link">
                 {% if channel.photo_url %}
-                    <img src="{{ channel.photo_url }}" width="40" height="40" style="border-radius: 50%;">
+                    <img src="{{ channel.photo_url }}" alt="Channel photo">
                 {% endif %}
-                <strong>{{ channel.name }}</strong> (@{{ channel.username }})
+                <div class="channel-info">
+                    <strong>{{ channel.name }}</strong><br>
+                    <span>@{{ channel.username }}</span>
+                </div>
             </a>
-            <form method="post" action="{% url 'delete_channel' channel.id %}" style="display:inline;">
+            <form method="post" action="{% url 'delete_channel' channel.id %}" class="delete-form">
                 {% csrf_token %}
                 <button type="submit">Удалить</button>
             </form>
@@ -46,6 +48,6 @@
         <p style="font-size: 16px; color: #666;">Попробуйте изменить условия поиска или добавьте новый канал.</p>
         <button onclick="location.href='{% url 'add_channel' %}'" style="margin-top: 20px;">Добавить канал</button>
     </div>
-{% endfor %}
+    {% endfor %}
 </ul>
 {% endblock %}
