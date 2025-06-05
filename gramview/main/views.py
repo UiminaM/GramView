@@ -8,9 +8,11 @@ def index(request):
     services = Service.objects.filter(is_displayed=True)
     return render(request, 'main/index.html', {'services': services})
 
+
 def reviews(request):
     reviews = Review.objects.all()
     return render(request, 'main/reviews.html', {'reviews': reviews})
+
 
 def register_view(request):
     if request.method == 'POST':

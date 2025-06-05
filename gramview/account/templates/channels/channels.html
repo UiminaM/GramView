@@ -5,8 +5,11 @@
 <h2>Список каналов</h2>
 
 <form method="get">
-    <input type="text" name="q" value="{{ query }}" placeholder="Поиск по названию...">
+    <input type="text" name="q" value="{{ query }}" placeholder="Поиск по названию..."
+       style="width: 945px; max-width: none;">
     <button type="submit">Поиск</button>
+    <button type="button" onclick="location.href='{% url 'add_channel' %}'">+</button>
+
 
     {% if is_advanced %}
         <label>
@@ -15,20 +18,21 @@
         </label>
     {% endif %}
 
-
-    <button type="button" onclick="location.href='{% url 'add_channel' %}'">+</button>
 </form>
 
 <ul>
     {% for channel in channels %}
-        <li style="margin-bottom: 15px;">
-            <a href="{% url 'channel_detail' channel.id %}" style="text-decoration: none; color: inherit;">
-                {% if channel.photo_url %}
-                    <img src="{{ channel.photo_url }}" width="40" height="40" style="border-radius: 50%;">
+        <li class="channel-item">
+            <a href="{% url 'channel_detail' channel.id %}" class="channel-link">
+                {% if channel.photo %}
+                  <img src="{{ channel.photo.url }}" alt="Channel photo">
                 {% endif %}
-                <strong>{{ channel.name }}</strong> (@{{ channel.username }})
+                <div class="channel-info">
+                    <span style="font-weight: 600; margin-right: 6px;">{{ channel.name }}</span>
+                    <span style="font-weight: normal; color: #666;">@{{ channel.username }}</span>
+                </div>
             </a>
-            <form method="post" action="{% url 'delete_channel' channel.id %}" style="display:inline;">
+            <form method="post" action="{% url 'delete_channel' channel.id %}" class="delete-form">
                 {% csrf_token %}
                 <button type="submit">Удалить</button>
             </form>
@@ -46,6 +50,6 @@
         <p style="font-size: 16px; color: #666;">Попробуйте изменить условия поиска или добавьте новый канал.</p>
         <button onclick="location.href='{% url 'add_channel' %}'" style="margin-top: 20px;">Добавить канал</button>
     </div>
-{% endfor %}
+    {% endfor %}
 </ul>
 {% endblock %}

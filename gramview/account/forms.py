@@ -3,12 +3,21 @@ from main.models import Review
 from django.contrib.auth.forms import UserChangeForm
 from main.models import CustomUser
 from .models import Channels
+from django.forms.widgets import ClearableFileInput
+
+
+class CustomClearableFileInput(ClearableFileInput):
+    template_name = 'widgets/custom_clearable_file_input.html'
 
 
 class ProfileEditForm(UserChangeForm):
     email = forms.EmailField(required=True)
     username = forms.CharField(max_length=150, required=True)
-    profile_picture = forms.ImageField(required=False)
+    profile_picture = forms.ImageField(
+        required=False,
+        label='Добавить фото',
+        widget=CustomClearableFileInput
+    )
     password = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:

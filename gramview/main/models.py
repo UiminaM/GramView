@@ -7,12 +7,12 @@ class CustomUser(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pics/', default='profile_pics/default.jpg', blank=True)
     groups = models.ManyToManyField(
         'auth.Group',
-        related_name='customuser_groups',  # Это имя будет использоваться для обратной связи с Group
+        related_name='customuser_groups',
         blank=True
     )
     user_permissions = models.ManyToManyField(
         'auth.Permission',
-        related_name='customuser_permissions',  # Это имя будет использоваться для обратной связи с Permission
+        related_name='customuser_permissions',
         blank=True
     )
 

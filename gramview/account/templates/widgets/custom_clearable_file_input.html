@@ -1,0 +1,6 @@
+<div class="custom-file-upload">
+  <label for="{{ widget.attrs.id }}">
+    {{ widget.attrs.label|default:"Выбрать файл" }}
+  </label>
+  <input type="file" name="{{ widget.name }}" id="{{ widget.attrs.id }}" {% include "django/forms/widgets/attrs.html" %}>
+</div>

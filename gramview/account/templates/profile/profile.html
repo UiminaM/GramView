@@ -3,14 +3,28 @@
 {% block title %}Профиль — GramView{% endblock %}
 
 {% block content %}
-<div class="profile">
+<div class="profile" style="position: relative;">
 
-  <form method="post" action="{% url 'logout' %}" class="logout-form">
-    {% csrf_token %}
-    <button type="submit">Выйти</button>
-  </form>
+  <div class="profile-header" style="position: relative; height: 30px;">
 
-  <img src="{{ profile_picture.url }}" alt="Profile Picture" width="120">
+    <a href="{% url 'channels' %}"
+       style="position: absolute; left: 5px; top: 50%; transform: translateX(-850%) translateY(80%); font-size: 24px; text-decoration: none; color: black; user-select: none; cursor: pointer;">
+      ←
+    </a>
+
+    <form method="post" action="{% url 'logout' %}"
+          style="position: absolute; right: 15px; top: 50%; transform: translateX(210%); margin: 0;">
+      {% csrf_token %}
+      <button type="submit"
+              style="background: #dc3545; padding: 8px 14px; font-size: 13px; border-radius: 8px; border: none; color: white; cursor: pointer;">
+        Выйти
+      </button>
+    </form>
+
+  </div>
+
+  <img src="{{ profile_picture.url }}" alt="Profile Picture" width="120" style="margin-top: 10px;">
+
   <h2>{{ user.username }}</h2>
   <p>Email: {{ user.email }}</p>
 
@@ -19,13 +33,12 @@
   </a>
 
   <form method="post">
-  {% csrf_token %}
-  <h3>Отзыв о платформе</h3>
-  {{ form.as_p }}
-  <button type="submit" name="submit_review">Отправить</button>
-  <button type="submit" name="delete_review">Удалить</button>
-</form>
-
+    {% csrf_token %}
+    <h3>Отзыв о платформе</h3>
+    {{ form.as_p }}
+    <button type="submit" name="submit_review">Отправить</button>
+    <button type="submit" name="delete_review">Удалить</button>
+  </form>
 
   {% if messages %}
     <ul>

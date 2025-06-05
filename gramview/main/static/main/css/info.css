@@ -33,10 +33,6 @@ nav a {
     font-size: 16px;
 }
 
-nav a:hover {
-    color: #556ee6;
-    text-decoration: underline;
-}
 
 main {
     padding: 40px 20px;

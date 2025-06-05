@@ -11,7 +11,8 @@
     <header>
         <div class="logo">GramView</div>
         <button class="profile-btn" onclick="location.href='{% url 'profile' %}'">
-            <img src="{{ user.profile_picture.url|default_if_none:'/static/images/default_avatar.png' }}" style="width: auto; height: 20px;">
+            <img src="{{ user.profile_picture.url|default_if_none:'/static/images/default_avatar.png' }}"
+                 style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
         </button>
     </header>
 

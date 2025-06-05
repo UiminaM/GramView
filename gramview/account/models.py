@@ -7,7 +7,7 @@ User = get_user_model()
 class Channels(models.Model):
     name = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
-    photo_url = models.URLField(blank=True, null=True)
+    photo = models.ImageField(upload_to='channels_pics/', blank=True, null=True)
     users = models.ManyToManyField(User, through='UserChannelAccess', related_name='channels')
     last_updated = models.DateTimeField(auto_now=True)
 

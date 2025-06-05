@@ -140,14 +140,9 @@ def process_form(request, is_advanced):
             except Exception as e:
                 messages.error(request, f"Ошибка при проверке канала: {str(e)}")
                 return None
-
         print(channel_data)
         if channel_data:
-            channel = form.save(commit=False)
-            channel.name = channel_data['title']
-            channel.username = channel_data['username']
-            channel.photo_url = channel_data['photo_url'] or None
-            channel.save()
+            channel = Channels.objects.filter(username=username).first()
 
             UserChannelAccess.objects.create(
                 channel=channel,

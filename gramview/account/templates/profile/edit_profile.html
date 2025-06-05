@@ -1,13 +1,32 @@
 {% extends 'account_base.html' %}
+{% load static %}
 
 {% block title %}Редактирование профиля — GramView{% endblock %}
 
 {% block content %}
-  <h2>Edit Profile</h2>
-  <form method="post" enctype="multipart/form-data">
+  <div style="display: flex; align-items: center; margin-bottom: 10px;">
+    <a href="{% url 'profile' %}" style="margin-right: 10px; text-decoration: none; font-size: 24px; color: black;">⟵</a>
+    <h2 style="margin: 0;">Редактировать профиль</h2>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" style="margin-top: 10px;">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Сохранить изменения</button>
+
+    <p>
+      <label for="{{ form.username.auto_id }}">Имя пользователя:</label><br>
+      {{ form.username }}
+    </p>
+
+    <p>
+      <label for="{{ form.email.auto_id }}">Email:</label><br>
+      {{ form.email }}
+    </p>
+
+    <p>
+      <label for="{{ form.profile_picture.auto_id }}">Добавить фото:</label>
+      {{ form.profile_picture }}
+    </p>
+
+    <button type="submit" style="margin-top: 15px;">Сохранить изменения</button>
   </form>
-  <a href="{% url 'profile' %}">Вернуться в профиль</a>
 {% endblock %}

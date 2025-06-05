@@ -5,6 +5,8 @@ from telethon.sessions import StringSession
 from datetime import datetime, timedelta, date
 from django.utils.timezone import make_aware, is_naive
 from account.models import Channels, Post, Comment, SubscriberGrowth
+from django.core.files import File
+import os
 import joblib
 
 
@@ -58,11 +60,16 @@ def classify_comment(text):
 
 
 @sync_to_async
-def save_channel(username, title, photo):
-    return Channels.objects.update_or_create(
-        username=username,
-        defaults={'name': title, 'photo_url': photo}
-    )
+def save_channel(username, title, photo_path):
+    obj, _ = Channels.objects.get_or_create(username=username)
+    obj.name = title
+
+    if photo_path:
+        with open(photo_path, 'rb') as f:
+            obj.photo.save(os.path.basename(photo_path), File(f), save=False)
+
+    obj.save()
+    return obj, _
 
 
 async def save_post(msg, channel, reactions_count=0, forwards_count=0):
@@ -114,9 +121,9 @@ async def get_channel_data(username, session_string, is_advanced):
 
     try:
         channel = await client.get_entity(username)
-        photo = await client.download_profile_photo(channel) or ''
+        photo_url = await client.download_profile_photo(channel)
 
-        db_channel, _ = await save_channel(channel.username, channel.title, photo)
+        db_channel, _ = await save_channel(channel.username, channel.title, photo_url)
 
         end_date = datetime.utcnow()
         start_date = end_date - timedelta(days=180)
@@ -146,16 +153,17 @@ async def get_channel_data(username, session_string, is_advanced):
 
             await update_comment_count(post_obj, comment_count)
             posts.append(post_obj)
-
+        
+        if is_advanced:
             full_channel = await client.get_entity(channel.username)
             subscribers = full_channel.participants_count
-
+    
             save_subscriber_growth(db_channel, subscribers)
 
         return {
             'title': db_channel.name,
             'username': db_channel.username,
-            'photo_url': db_channel.photo_url
+            'photo_url': photo_url
         }
 
     except Exception as e:

@@ -4,38 +4,41 @@ from collections import Counter
 from datetime import datetime, timedelta
 from account.models import Post, Comment, SubscriberGrowth
 
+
 def generate_dynamic_activity_chart(channel, detailed=False):
     today = datetime.now()
-    three_months_ago = today - timedelta(weeks=12)
+    six_months_ago = today - timedelta(weeks=24)
 
     posts = Post.objects.filter(
         channel=channel,
-        published_at__gte=three_months_ago
+        published_at__gte=six_months_ago
     )
     data_by_week = {}
 
     for post in posts:
-        post_date = post.published_at
-        days_ahead = 6 - post_date.weekday()
-        sunday_date = post_date + timedelta(days=days_ahead)
-        sunday_date = sunday_date.date()
+        post_date = post.published_at.date()
+        days_behind = (post_date.weekday() + 1) % 7
+        sunday_date = post_date - timedelta(days=days_behind)
 
-        if sunday_date not in data_by_week:
-            data_by_week[sunday_date] = {
+        base_sunday = datetime(1970, 1, 4).date()
+        delta_days = (sunday_date - base_sunday).days
+        two_week_period = delta_days // 14
+
+        end_of_two_week = base_sunday + timedelta(days=14 * (two_week_period + 1) - 1)
+
+        if end_of_two_week not in data_by_week:
+            data_by_week[end_of_two_week] = {
                 'views_sum': 0,
                 'posts_count': 0,
                 'reactions_sum': 0,
                 'forwards_sum': 0,
             }
 
-        data_by_week[sunday_date]['views_sum'] += post.reactions_count
-        data_by_week[sunday_date]['posts_count'] += 1
+        data_by_week[end_of_two_week]['views_sum'] += post.views_count
+        data_by_week[end_of_two_week]['posts_count'] += 1
+        data_by_week[end_of_two_week]['reactions_sum'] += post.reactions_count
+        data_by_week[end_of_two_week]['forwards_sum'] += post.forwards_count or 0
 
-        if detailed:
-            if hasattr(post, 'reactions_count'):
-                data_by_week[sunday_date]['reactions_sum'] += post.reactions_count
-            if hasattr(post, 'forwards_count'):
-                data_by_week[sunday_date]['forwards_sum'] += post.forwards_count
 
     sorted_dates = sorted(data_by_week.keys())
 
@@ -60,7 +63,7 @@ def generate_dynamic_activity_chart(channel, detailed=False):
         x=dates,
         y=avg_views,
         mode='lines+markers',
-        name='Среднее количество реакций'
+        name='Среднее количество просмотров'
     ))
 
     fig.add_trace(go.Scatter(
@@ -95,6 +98,9 @@ def generate_dynamic_activity_chart(channel, detailed=False):
     return fig.to_html(full_html=False)
 
 
+import plotly.graph_objs as go
+from django.db.models import Count
+from account.models import Comment
 
 def generate_comments_classification_chart(channel):
     classification_counts = (
@@ -105,17 +111,26 @@ def generate_comments_classification_chart(channel):
 
     labels = []
     values = []
+    color_map = {
+        'Positive': '#5cd68d',
+        'Neutral': '#6553db',
+        'Negative': '#e04e3a',
+        'Нет данных': '#E0E0E0'
+    }
 
     for entry in classification_counts:
-        labels.append(dict(Comment.CLASS_CHOICES).get(entry['classification'], entry['classification']))
+        label = dict(Comment.CLASS_CHOICES).get(entry['classification'], entry['classification'])
+        labels.append(label)
         values.append(entry['count'])
 
     if not labels:
         labels = ['Нет данных']
         values = [1]
 
+    colors = [color_map.get(label, '#CCCCCC') for label in labels]
+
     fig = go.Figure(data=[
-        go.Pie(labels=labels, values=values, hole=0.4)
+        go.Pie(labels=labels, values=values, hole=0.4, marker=dict(colors=colors))
     ])
 
     fig.update_layout(
@@ -124,6 +139,8 @@ def generate_comments_classification_chart(channel):
     )
 
     return fig.to_html(full_html=False)
+
+
 
 def generate_peak_activity_time_chart(channel, detailed=False):
     today = datetime.now()
